@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Mirror Buildaton</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#F8F8FF" />
+
+  <style>
+    @font-face{
+      font-family: "Bodoni72";
+      src: url("/static/fonts/bodoni-72-oldstyle-book1.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face{
+      font-family: "BebasNeue";
+      src: url("/static/fonts/BebasNeue-Regular1.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    :root{
+      --bg: #F8F8FF;
+      --btn: #D5D5D5;
+
+      --hello: #959595;
+      --headline: #2C2C2C;
+      --btnText: #F8F8FF;
+
+      --radius: 26px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body{
+      margin: 0;
+      background: var(--bg);
+      color: var(--headline);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .wrap{
+      max-width: 520px; 
+      margin: 0 auto;
+      padding: 28px 22px 40px;
+    }
+
+    .logo{
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+      margin-bottom: 24px;
+    }
+    .logo img{
+      width: 60px;
+      height: auto;
+      display: block;
+    }
+
+    .hello{
+      font-family: "Bodoni72", serif;
+      font-weight: 400;
+      font-size: 60px;
+      line-height: 1.4;
+      color: var(--hello);
+      margin: 8px 0 10px;
+    }
+
+    .headline{
+      font-family: "Bodoni72", serif;
+      width: 100%;
+      font-weight: 400;
+      font-size: 40px;
+      line-height: 1.1;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--headline);
+      margin: 0 0 38px;
+    }
+
+    .buttons{
+      display: grid;
+      gap: 24px;
+    }
+
+    .action{
+      width: 100%;
+      border: 0;
+      background: var(--btn);
+      border-radius: var(--radius);
+      padding: 26px 26px;
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 12px;
+      align-items: center;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .action:active{
+      transform: translateY(1px);
+      filter: brightness(0.97);
+    }
+
+    .action img{
+      width: 60px;
+      height: auto;
+      display: block;
+    }
+
+    .label{
+      font-family: "BebasNeue", sans-serif;
+      font-weight: 400;
+      font-size: 40px;
+      line-height: 1;
+      letter-spacing: 0.0em;
+      color: var(--btnText);
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status{
+      margin-top: 20px;
+      font-size: 16px;
+      color: #6b6b6b;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    @media (max-width: 430px){
+      .hello{ font-size: 70px; }
+      .headline{ font-size: 40px; }
+      .label{ font-size: 50px; }
+      .action{ grid-template-columns: 54px 1fr; padding: 22px; }
+      .action img{ width: 46px; }
+    }
+
+    @media (max-width: 360px){
+      .hello{ font-size: 70px; }
+      .headline{ font-size: 40px; }
+      .label{ font-size: 50px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="logo">
+      <img src="/static/tailored-logo.png" alt="Logo" />
+    </div>
+
+    <div class="hello">hello,</div>
+
+    <div class="headline">
+      HOW CAN I HELP<br/>
+      YOU TODAY?
+    </div>
+
+    <div class="buttons">
+      <button class="action" onclick="sendCmd('rate')" aria-label="Rate my outfit">
+        <img src="/static/outfit.png" alt="" />
+        <div class="label">RATE MY OUTFIT</div>
+      </button>
+
+      <button class="action" onclick="sendCmd('decide')" aria-label="Decide on item">
+        <img src="/static/decide.png" alt="" />
+        <div class="label">DECIDE ON ITEM</div>
+      </button>
+    </div>
+
+    <div class="status" id="status">Ready.</div>
+  </div>
+
+  <script>
+    async function sendCmd(cmd) {
+      const statusEl = document.getElementById("status");
+      try {
+        statusEl.textContent = "Sending…";
+
+        const res = await fetch("/api/cmd", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cmd })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          statusEl.textContent = "Error.";
+          return;
+        }
+
+        statusEl.textContent = "Done.";
+      } catch (e) {
+        statusEl.textContent = "Network error.";
+      }
+    }
+  </script>
+</body>
+</html>
