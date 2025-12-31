@@ -192,7 +192,6 @@ python src/led_test.py
 Stop execution:
 
 ```mathematica
-Copy code
 Ctrl + C
 ```
 
