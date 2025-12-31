@@ -1,0 +1,11 @@
+# Core
+numpy
+
+# Computer vision / camera
+opencv-python
+
+# Optional: video streaming / processing
+opencv-contrib-python
+
+# GPIO for RP4 
+gpiozero
