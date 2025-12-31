@@ -11,3 +11,24 @@ opencv-contrib-python
 gpiozero
 pigpio
 
+# Web framework
+Flask==3.0.0
+flask-cors==4.0.0
+gunicorn==23.0.0 # Pin to specific version to avoid compatibility issues with Flask 3
+
+# Data validation
+pydantic==2.7.4
+
+# Environment variable management
+python-dotenv==1.0.1
+
+# AI SDKs
+openai>=1.47.0
+google-genai>=0.2.0
+
+# Image processing
+Pillow==11.3.0
+
+# HTTP requests
+requests==2.32.5
+h11==0.14.0
