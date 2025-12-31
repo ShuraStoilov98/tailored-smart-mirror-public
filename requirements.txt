@@ -9,3 +9,5 @@ opencv-contrib-python
 
 # GPIO for RP4 
 gpiozero
+pigpio
+
