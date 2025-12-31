@@ -240,3 +240,108 @@ project-root/
 └── docs/
     └── SETUP_RASPBERRY_PI.md
 ```
+
+## 14. Git Workflow Cheat Sheet (PC ↔ Raspberry Pi)
+
+This project is developed across **PC (Windows/macOS/Linux)** and **Raspberry Pi 4**.  
+Follow this workflow to avoid conflicts and broken environments.
+
+---
+
+### 14.1 One-time Git configuration (recommended)
+
+Use **rebase** for the repo by default to keep history clean:
+### NOTE: Alrady DONE by Shura 31/12/25
+
+```bash
+git config pull.rebase true
+```
+
+### 14.2 Daily workflow (safe default)
+Before starting work (PC or Pi)
+```bash
+git pull
+```
+
+Check status
+```bash
+git status
+```
+
+Add changes, Commit & Push changes
+```bash
+git add .
+git commit -m "Describe change clearly"
+git push
+```
+
+### 14.3 When switching machines (PC → Pi or Pi → PC)
+Always do this first:
+
+```bash
+git pull
+```
+
+Then continue work.
+
+### 14.4 If Git says “divergent branches”
+
+This means local and remote both changed.
+
+Preferred fix:
+
+```bash
+git pull --rebase
+```
+
+If conflicts occur:
+
+```bash
+git status
+# edit conflicted files
+git add <fixed_file>
+git rebase --continue
+```
+
+To cancel:
+
+```bash
+git rebase --abort
+```
+
+### 14.5 Emergency reset (⚠ destructive)
+If you do not care about local changes and want to match GitHub exactly:
+
+```bash
+git fetch origin
+git reset --hard origin/main
+```
+
+### 14.6 Inspect history (useful for debugging)
+```bash
+git log --oneline --graph --decorate -10
+```
+
+### 14.7 What NOT to commit
+Never commit:
+
+.venv/
+
+__pycache__/
+
+.DS_Store
+
+.vscode/settings.json (unless intentional)
+
+These should be in .gitignore. and ARE as of 31/12/25
+
+## 14.8 Golden rules
+Pull before you code
+
+Commit small, logical changes
+
+Push at least daily
+
+Use rebase, not merge
+
+Never develop directly on the Pi without pulling first
