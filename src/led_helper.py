@@ -10,7 +10,6 @@ class StatusLED:
         self._thread = None
 
     def _flash(self, interval: float, times: int = 1):
-        """Internal function to flash the LED `times` with given interval."""
         for _ in range(times):
             self.led.on()
             sleep(interval)
@@ -18,22 +17,18 @@ class StatusLED:
             sleep(interval)
 
     def always_on(self):
-        """Turn the LED always on (blocking)."""
         self.stop()
         self.led.on()
 
     def flash_fast(self, times: int = 5):
-        """Flash quickly (for image capture)."""
         self.stop()
-        self._flash(0.05, times)  # 50ms on/off
+        self._flash(0.05, times)
 
     def flash_medium(self, times: int = 5):
-        """Flash at medium speed (for analysis done)."""
         self.stop()
-        self._flash(0.25, times)  # 250ms on/off
+        self._flash(0.25, times)
 
     def start_background_blink(self, interval: float = 0.5):
-        """Start a background blinking thread (non-blocking)."""
         self.stop()
         self._stop_thread = False
 
@@ -48,9 +43,9 @@ class StatusLED:
         self._thread.start()
 
     def stop(self):
-        """Stop any background thread and turn off LED."""
         self._stop_thread = True
         if self._thread:
             self._thread.join()
-        self.led.off()
+        if self.led:
+            self.led.off()
         self._thread = None

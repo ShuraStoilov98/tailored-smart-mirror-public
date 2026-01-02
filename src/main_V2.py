@@ -317,17 +317,18 @@ def conduct_text_to_speech(output_path: pathlib.Path, input_text: str, audio_ins
 
 
 def capture_image_from_camera_for_analysis(
-    out_path: pathlib.Path,
+    image_dir: pathlib.Path,
     camera_index: int = 0,
     warmup_frames: int = 5,
-) -> pathlib.Path:
+):
     """
-    Captures a single frame from the camera and saves it to out_path.
+    Captures a single frame from the camera and saves it to filename.
     Returns the saved image path.
     """
     import cv2
+    new_filename = image_dir / "camera_capture.jpg"
 
-    ensure_parent_dir(out_path)
+    ensure_parent_dir(new_filename)
 
     cap = cv2.VideoCapture(camera_index, cv2.CAP_V4L2)
 
@@ -344,17 +345,10 @@ def capture_image_from_camera_for_analysis(
     if frame is None or not ret:
         raise RuntimeError("Failed to capture image from camera")
 
-    if not cv2.imwrite(str(out_path), frame):
+    if not cv2.imwrite(str(new_filename), frame):
         raise RuntimeError("Failed to write image to disk")
 
-    return out_path
-
-# LED and Audio helpers setup
-led = StatusLED(pin=23)
-led.always_on() # Always on as default indicator
-
-audio_player = AudioPlayer()
-audio_player.stop()  # Ensure no audio is playing at start
+    return new_filename
 
 # ----------------------------
 # Routes
@@ -392,18 +386,18 @@ def cmd():
         led.flash_fast(times=5)
 
         # Call helper to capture image from camera
-        input_image_file_name = capture_image_from_camera_for_analysis(input_image_file_name)
+        input_image_file_name_new = capture_image_from_camera_for_analysis(IMAGE_INPUT_DATA_DIR)
 
         # Save image from request if provided, otherwise use existing file
-        decode_and_save_image_from_request(body, input_image_file_name)
+        decode_and_save_image_from_request(body, input_image_file_name_new)
 
         # Start non-blocking LED + audio indicators
         led.stop() # Stop any prior LED activity
         led.start_background_blink(interval=0.3)
         audio_player.play(filler_audio_file_name)
 
-        if not input_image_file_name.exists():
-            return jsonify({"error": f"Missing input image at {str(input_image_file_name)}"}), 400
+        if not input_image_file_name_new.exists():
+            return jsonify({"error": f"Missing input image at {str(input_image_file_name_new)}"}), 400
 
         # Build correct prompt per mode
         if cmd_name == "rate":
@@ -464,13 +458,16 @@ def cmd():
         app.logger.exception("Smart mirror project crashed")
         return jsonify({"error": str(e)}), 500
 
-# Restore LED to always on after each request
-@app.after_request
-def after_request(response):
-    led.stop()
-    led.always_on()
-    return response
 
 if __name__ == "__main__":
-    # Listen on all interfaces so your phone can reach it over Wi-Fi
+    # Only initialize hardware in the child process
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        try:
+            led = StatusLED(pin=23)
+            led.always_on()
+            audio_player = AudioPlayer()
+            audio_player.stop()
+        except Exception as e:
+            app.logger.exception("Failed to initialize hardware")
+
     app.run(host="0.0.0.0", port=8080, debug=True)
