@@ -398,6 +398,7 @@ def cmd():
         decode_and_save_image_from_request(body, input_image_file_name)
 
         # Start non-blocking LED + audio indicators
+        led.stop() # Stop any prior LED activity
         led.start_background_blink(interval=0.3)
         audio_player.play(filler_audio_file_name)
 
@@ -416,6 +417,7 @@ def cmd():
         review_text = image_to_json_review(input_image_file_name, prompt)
 
         # Flash LED at medium speed to indicate analysis done
+        led.stop() # Stop prior activity
         led.flash_medium(times=5)
 
         # Save raw output for debugging
@@ -442,6 +444,7 @@ def cmd():
         conduct_text_to_speech(output_audio_file_name, spoken_text, build_text_to_audio_prompt())
 
         # Start non-blocking
+        led.stop() # Stop prior activity
         led.start_background_blink(interval=0.3) 
 
         # Play the generated audio
@@ -464,6 +467,7 @@ def cmd():
 # Restore LED to always on after each request
 @app.after_request
 def after_request(response):
+    led.stop()
     led.always_on()
     return response
 
