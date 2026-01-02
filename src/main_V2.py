@@ -6,6 +6,10 @@ import base64
 from dotenv import load_dotenv
 from openai import OpenAI
 
+# Helpers
+from led_helper import StatusLED
+from audio_helper import AudioPlayer
+
 # Start the project
 print("Smart mirror project ready 🚀")
 
@@ -25,9 +29,10 @@ IMAGE_INPUT_DATA_DIR.mkdir(parents=True, exist_ok=True)
 TEXT_OUTPUT_DATA_DIR.mkdir(parents=True, exist_ok=True)
 AUDIO_OUTPUT_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-input_image_file_name = IMAGE_INPUT_DATA_DIR / "image.JPG"
+input_image_file_name = IMAGE_INPUT_DATA_DIR / "image.jpg"
 output_text_file_name = TEXT_OUTPUT_DATA_DIR / "result.json"
 output_audio_file_name = AUDIO_OUTPUT_DATA_DIR / "result.mp3"
+filler_audio_file_name = AUDIO_OUTPUT_DATA_DIR / "filler.mp3"
 
 # ----------------------------
 # OpenAI setup
@@ -311,6 +316,46 @@ def conduct_text_to_speech(output_path: pathlib.Path, input_text: str, audio_ins
         response.stream_to_file(str(output_path))
 
 
+def capture_image_from_camera_for_analysis(
+    out_path: pathlib.Path,
+    camera_index: int = 0,
+    warmup_frames: int = 5,
+) -> pathlib.Path:
+    """
+    Captures a single frame from the camera and saves it to out_path.
+    Returns the saved image path.
+    """
+    import cv2
+
+    ensure_parent_dir(out_path)
+
+    cap = cv2.VideoCapture(camera_index, cv2.CAP_V4L2)
+
+    if not cap.isOpened():
+        raise RuntimeError("Camera not opened")
+
+    # Warm up camera (important on Pi / USB cams)
+    frame = None
+    for _ in range(warmup_frames):
+        ret, frame = cap.read()
+
+    cap.release()
+
+    if frame is None or not ret:
+        raise RuntimeError("Failed to capture image from camera")
+
+    if not cv2.imwrite(str(out_path), frame):
+        raise RuntimeError("Failed to write image to disk")
+
+    return out_path
+
+# LED and Audio helpers setup
+led = StatusLED(pin=23)
+led.always_on() # Always on as default indicator
+
+audio_player = AudioPlayer()
+audio_player.stop()  # Ensure no audio is playing at start
+
 # ----------------------------
 # Routes
 # ----------------------------
@@ -343,8 +388,18 @@ def cmd():
         return jsonify({"error": "cmd must be 'rate' or 'decide'"}), 400
 
     try:
+        # Start fast LED flash for image capture
+        led.flash_fast(times=5)
+
+        # Call helper to capture image from camera
+        input_image_file_name = capture_image_from_camera_for_analysis(input_image_file_name)
+
         # Save image from request if provided, otherwise use existing file
         decode_and_save_image_from_request(body, input_image_file_name)
+
+        # Start non-blocking LED + audio indicators
+        led.start_background_blink(interval=0.3)
+        audio_player.play(filler_audio_file_name)
 
         if not input_image_file_name.exists():
             return jsonify({"error": f"Missing input image at {str(input_image_file_name)}"}), 400
@@ -359,6 +414,9 @@ def cmd():
 
         # Vision -> JSON review
         review_text = image_to_json_review(input_image_file_name, prompt)
+
+        # Flash LED at medium speed to indicate analysis done
+        led.flash_medium(times=5)
 
         # Save raw output for debugging
         ensure_parent_dir(output_text_file_name)
@@ -383,6 +441,13 @@ def cmd():
         spoken_text = review_json_to_spoken_text(review_json, mode=mode)
         conduct_text_to_speech(output_audio_file_name, spoken_text, build_text_to_audio_prompt())
 
+        # Start non-blocking
+        led.start_background_blink(interval=0.3) 
+
+        # Play the generated audio
+        audio_player.stop()  # Stop any filler audio
+        audio_player.play(output_audio_file_name)
+
         return jsonify({
             "ok": True,
             "mode": mode,
@@ -396,6 +461,11 @@ def cmd():
         app.logger.exception("Smart mirror project crashed")
         return jsonify({"error": str(e)}), 500
 
+# Restore LED to always on after each request
+@app.after_request
+def after_request(response):
+    led.always_on()
+    return response
 
 if __name__ == "__main__":
     # Listen on all interfaces so your phone can reach it over Wi-Fi

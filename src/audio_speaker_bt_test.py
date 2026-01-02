@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-mp3_file = "test.mp3"  # put your mp3 in the same folder
+mp3_file = "result.mp3"  # The mp3 needs to be in the same folder
 
 try:
     subprocess.run(
