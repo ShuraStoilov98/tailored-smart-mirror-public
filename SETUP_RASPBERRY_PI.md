@@ -1,346 +1,92 @@
-# Raspberry Pi 4 – Setup & Development Guide (VS Code + SSH)
+# Raspberry Pi setup
 
-This guide explains how to set up a Raspberry Pi 4 for development using **SSH**, **VS Code Remote**, **Python virtual environments**, and **GitHub**.  
+This guide targets a Raspberry Pi 4, USB/V4L2 camera and GPIO23 status LED, using **Raspberry Pi OS Trixie, 64-bit, Python 3.13**. Hardware dependencies require Python 3.12 or newer; a stock Bookworm/Python 3.11 install cannot use the supplied locks unchanged. The full setup still needs testing on the physical build. Pi 5, 32-bit OS and CSI/libcamera support are not covered.
 
-Purpouse is to ensure smooth collaborative work during Xmas fun build-athon.
+Raspberry Pi's [OS documentation](https://www.raspberrypi.com/documentation/computers/os.html) identifies Trixie as the current base and recommends virtual environments for pip installations. Keep the original boot media intact if testing a newer image.
 
----
+## Prepare the Pi
 
-## 1. Flashing the OS (one-time)
-
-1. Install **Raspberry Pi Imager**
-2. Select:
-   - **OS**: Raspberry Pi OS (64-bit)
-   - **Storage**: your SD card
-3. Open **Advanced Options (⚙️)**:
-   - Enable SSH
-   - Set hostname (e.g. `raspberrypi`)
-   - Set username and password
-   - Configure Wi-Fi (SSID + password)
-   - (Optional) Enable Raspberry Pi Connect
-4. Flash the SD card, insert it into the Pi, and power it on
-
-## NOTE: Only need to do ONCE at start OR if major issues and full reboot req.
-Last done on [30/12/2025] for buildathon.
-
----
-
-## 2. Find the Raspberry Pi IP address
-
-### Option A – Router admin panel (recommended)
-Locate a device named `raspberrypi` and note its IPv4 address, for example:
-192.0.2.10
-
-### NOTE: This is actual IP adress 192.0.2.10 for buildathon
-
-### Option B – From another machine
-```bash
-ping raspberrypi.local
-```
-
-## 3. SSH into the Raspberry Pi (sanity check)
-From your PC terminal / PowerShell:
+Use Raspberry Pi Imager to flash a **separate** microSD card with the desktop 64-bit OS; configure your own login, hostname, Wi-Fi and SSH locally. Do not commit those details. Verify the SSH host key against the Pi/router's trusted information rather than automatically accepting a changed key. Development can use a local terminal or VS Code Remote SSH.
 
 ```bash
-ssh <username>@192.0.2.10
-```
-
-Example:
-```bash
-ssh YOUR_PI_USER@192.0.2.10
-```
-### Note: One above is actual credentials to be used for buildathon.
-
-If prompted about host authenticity:
-
-```text
-Are you sure you want to continue connecting? → yes
-```
-
-## 4. VS Code Remote SSH setup
-1. Install Visual Studio Code (If not already intsalled :D)
-2. Install the extension Remote – SSH
-
-Open Command Palette:
-
-```css
-Ctrl + Shift + P
-```
-Select:
-
-```pgsql
-Remote-SSH: Connect to Host
-```
-Enter:
-
-```css
-YOUR_PI_USER@192.0.2.10
-Platform: Linux
-```
-
-Enter your password
-### NOTE: Ask Shura for the password
-
-➡️ A new VS Code window opens — this window runs directly on the Raspberry Pi.
-
-## 5. System preparation (recommended)
-Run once on the Raspberry Pi:
-### NOTE: Do once for each new flash of the RP4 SD card - already done for buildathon 
-
-```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y git python3 python3-pip python3-venv
-```
-
-Verify:
-
-```bash
+sudo apt update
+sudo apt install -y git python3-venv python3-pip python3-lgpio v4l-utils libsdl2-2.0-0 libsdl2-mixer-2.0-0
 python3 --version
-git --version
+uname -m
 ```
 
-## 6. Clone the GitHub repository
-Create a workspace:
-### NOTE: Do once for each new flash of the RP4 SD card - already done for buildathon 
-### DO ALL OF THESE
+Expect Python 3.13 and `aarch64` on this OS image. Clone the project and enter its root directory:
 
 ```bash
-mkdir -p ~/Desktop/projects
-cd ~/Desktop/projects
+git clone https://github.com/ShuraStoilov98/tailored-smart-mirror-public.git
+cd tailored-smart-mirror-public
 ```
-
-Clone the repo:
 
 ```bash
-git clone https://github.com/ShuraStoilov98/tailored-smart-mirror.git
-cd tailored-smart-mirror
+python3 -m venv --system-site-packages .venv
+source .venv/bin/activate
+python -m pip install -r requirements-hardware.lock
+python -m pip check
+mkdir -p secrets
+chmod 700 secrets
+cp .env.example secrets/.env
+chmod 600 secrets/.env
 ```
 
-## 7. Python virtual environment (.venv)
-Create the virtual environment
-### NOTE: Do once for each new flash of the RP4 SD card - already done for buildathon 
+The system-site-packages flag makes the OS-provided `lgpio` backend available. Python packages in the lock take precedence; maintain OS packages, the kernel and the audio stack with APT. Direct dependencies are listed in `requirements.txt` and `requirements-hardware.txt`; the lock files pin their transitive dependencies.
+
+Edit `secrets/.env` locally. Supply an OpenAI key with access to the configured vision/TTS models, and set a provider-side spending limit. Environment variables override file values. Defaults retain the project's `gpt-4o-mini`, `gpt-4o-mini-tts` and `alloy`; check availability in your account. Only the direct launch reads this file; an imported app factory uses environment variables or explicit configuration. No credentials are needed for offline tests.
+
+## Devices and permissions
+
+Power off before wiring the LED. See [Wiring](docs/Wiring.md). Use `MIRROR_LED_PIN` for a BCM pin and `MIRROR_CAMERA_INDEX` for a numeric OpenCV device index.
+
 ```bash
-python3 -m venv .venv
+v4l2-ctl --list-devices
+v4l2-ctl --device /dev/video0 --list-formats-ext
+groups
+ls -l /dev/video0 /dev/gpiochip*
 ```
 
-Activate (.venv) – Raspberry Pi / Linux
-### NOTE: Do once at every new init of IDE to work and make changes
+If the device permissions require them, add your login to the `video` and `gpio` groups, then log out and back in:
+
+```bash
+sudo usermod -aG video,gpio "$USER"
+```
+
+Run the app as your login, without sudo. Use `GPIOZERO_PIN_FACTORY=lgpio` to select the OS GPIO backend. USB UVC cameras use V4L2 and do not require a legacy camera enable step. A different camera index may be needed if multiple `/dev/video*` nodes exist.
+
+Select the speaker as the desktop's default audio output. Pair a Bluetooth speaker through the desktop Bluetooth/audio controls first; pygame does not perform pairing. An SSH-only session may lack access to the desktop user's audio session; start the app in the same user's desktop terminal for the first test.
+
+## Run and access
+
 ```bash
 source .venv/bin/activate
+GPIOZERO_PIN_FACTORY=lgpio python src/main.py
 ```
 
-Expected prompt:
-
-```text
-(.venv) username@raspberrypi:...
-```
-
-Deactivate
-```bash
-deactivate
-```
-
-## 8. Install Python dependencies
-Upgrade pip:
-### NOTE: Do once for each new flash of the RP4 SD card - already done for buildathon 
+Open `http://127.0.0.1:8080` locally. For a laptop browser, forward loopback from your own Pi hostname/login:
 
 ```bash
-pip install --upgrade pip
+ssh -N -L 8080:127.0.0.1:8080 YOUR_PI_USER@YOUR_PI_HOST
 ```
 
-Install project dependencies:
-### NOTE: Add to requirements.txt file for traceability 
+Open the same URL on the laptop. If port 8080 is in use locally, choose another local port, e.g. `8081:127.0.0.1:8080`. The page receives a temporary token; refresh after restarting the server. API clients must obtain that token from the local page and send `X-Mirror-Token`. Never place the token in a URL or public recording.
+
+Keep one application process for the single camera/speaker. There is no installed service or multi-worker configuration. Start manually and stop with Ctrl+C; managed service/audio integration requires hardware testing first. Do not expose the Flask development server directly on a LAN or the internet.
+
+A click captures a photo, invokes vision, validates the review and generates/plays speech. Failure returns a generic message and cleans up indicators/files. `/health` checks HTTP responsiveness only, not hardware or provider availability. No continuous stream is served. Runtime photos are deleted after a request; the latest MP3 remains local until the next request or orderly shutdown. Abrupt termination may leave files in ignored `runtime/`; clear them locally after reviewing retention needs. OpenAI receives photos and spoken text; `store=False` avoids storing the Responses object but does not promise zero provider retention. See [OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data).
+
+## Check each component
 
 ```bash
-pip install -r requirements.txt
+python -m unittest discover -s tests -p 'test_*.py' -v
+python tests/scripts/led_test.py
+python tests/scripts/camera_test.py
+# After an actual successful analysis has generated runtime/result.mp3:
+python tests/scripts/audio_speaker_bt_test.py
 ```
 
-Freeze current environment (when needed - for now Optional - IGNORE):
+The camera check saves a private local JPEG; the audio check plays your latest result. Stop LED/audio checks with Ctrl+C or the requested Enter key. These are manual device checks, excluded from automated test discovery. A synthetic test pass does not prove the physical devices work.
 
-```bash
-pip freeze > requirements.txt
-```
-
-## 9. VS Code Python interpreter selection
-Inside the SSH VS Code window:
-Open Command Palette:
-
-```css
-Ctrl + Shift + P
-```
-
-Select:
-
-```vbnet
-Python: Select Interpreter
-```
-
-Choose:
-
-```bash
-.venv/bin/python
-```
-This ensures all scripts run inside the virtual environment.
-
-## 10. Running scripts
-Examples:
-
-```bash
-python src/camera_test.py
-python src/led_test.py
-```
-Stop execution:
-
-```mathematica
-Ctrl + C
-```
-
-## 11. GPIO access (hardware control)
-For GPIO access without sudo, ensure your user is in the gpio group:
-
-```bash
-groups
-```
-
-If needed:
-
-```bash
-sudo usermod -aG gpio $USER
-sudo reboot
-```
-
-## 12. Common troubleshooting
-1. SSH host key mismatch
-```bash
-ssh-keygen -R 192.0.2.10
-```
-
-2. Permission denied on SSH
-Verify username (not always pi)
-
-Verify password
-
-Ensure SSH was enabled in Raspberry Pi Imager
-
-3. OpenCV GUI errors (cv2.imshow)
-When connected via SSH, use headless capture (no GUI windows).
-Save frames to disk instead of displaying them.
-
-## 13. Recommended project structure
-```css
-project-root/
-├── .venv/
-├── requirements.txt
-├── README.md
-├── src/
-│   ├── camera_test.py
-│   ├── led_test.py
-│   └── main.py
-└── docs/
-    └── SETUP_RASPBERRY_PI.md
-```
-
-## 14. Git Workflow Cheat Sheet (PC ↔ Raspberry Pi)
-
-This project is developed across **PC (Windows/macOS/Linux)** and **Raspberry Pi 4**.  
-Follow this workflow to avoid conflicts and broken environments.
-
----
-
-### 14.1 One-time Git configuration (recommended)
-
-Use **rebase** for the repo by default to keep history clean:
-### NOTE: Alrady DONE by Shura 31/12/25
-
-```bash
-git config pull.rebase true
-```
-
-### 14.2 Daily workflow (safe default)
-Before starting work (PC or Pi)
-```bash
-git pull
-```
-
-Check status
-```bash
-git status
-```
-
-Add changes, Commit & Push changes
-```bash
-git add .
-git commit -m "Describe change clearly"
-git push
-```
-
-### 14.3 When switching machines (PC → Pi or Pi → PC)
-Always do this first:
-
-```bash
-git pull
-```
-
-Then continue work.
-
-### 14.4 If Git says “divergent branches”
-
-This means local and remote both changed.
-
-Preferred fix:
-
-```bash
-git pull --rebase
-```
-
-If conflicts occur:
-
-```bash
-git status
-# edit conflicted files
-git add <fixed_file>
-git rebase --continue
-```
-
-To cancel:
-
-```bash
-git rebase --abort
-```
-
-### 14.5 Emergency reset (⚠ destructive)
-If you do not care about local changes and want to match GitHub exactly:
-
-```bash
-git fetch origin
-git reset --hard origin/main
-```
-
-### 14.6 Inspect history (useful for debugging)
-```bash
-git log --oneline --graph --decorate -10
-```
-
-### 14.7 What NOT to commit
-Never commit:
-
-.venv/
-
-__pycache__/
-
-.DS_Store
-
-.vscode/settings.json (unless intentional)
-
-These should be in .gitignore. and ARE as of 31/12/25
-
-## 14.8 Golden rules
-Pull before you code
-
-Commit small, logical changes
-
-Push at least daily
-
-Use rebase, not merge
-
-Never develop directly on the Pi without pulling first
+For camera failure, confirm USB enumeration/permissions and format support. For GPIO failure, confirm `python3-lgpio` is visible inside the venv and group access. For speech failure, verify your audio session/output; for provider failure, verify the local key, account/model access and connection. Errors intentionally omit raw provider details and local paths. Do not share screenshots containing keys or terminal configuration.

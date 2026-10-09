@@ -206,3 +206,20 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Private mirror inputs, outputs, recordings and local backups
+secrets/
+.env.*
+!.env.example
+runtime/
+src/image_input/
+src/output/
+tests/data/
+demo-private/
+.publication/
+*.pem
+*.key
+*.sqlite*
+*.bak
+*.bundle
+.vscode/

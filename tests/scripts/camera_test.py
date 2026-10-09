@@ -1,15 +1,12 @@
-import cv2
+"""Capture one local USB-camera frame; output stays in ignored runtime/."""
+import sys
+from pathlib import Path
 
-cap = cv2.VideoCapture(0)  # Adjust 0 if multiple cameras are connected
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+from main import capture_image_from_camera_for_analysis
 
-if not cap.isOpened():
-    raise RuntimeError("Camera not opened")
-
-ret, frame = cap.read()
-cap.release()
-
-if not ret:
-    raise RuntimeError("Failed to grab frame")
-
-cv2.imwrite("test_frame.jpg", frame)
-print("Saved test_frame.jpg")
+if __name__ == "__main__":
+    destination = Path(__file__).resolve().parents[2] / "runtime"
+    destination.mkdir(mode=0o700, exist_ok=True)
+    capture_image_from_camera_for_analysis(destination)
+    print("Saved runtime/camera_capture.jpg (private; do not commit)")

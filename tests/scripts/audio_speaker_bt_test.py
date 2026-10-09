@@ -1,13 +1,14 @@
-import subprocess
+"""Play a locally generated result through the OS-selected speaker."""
 import sys
+from pathlib import Path
 
-mp3_file = "result.mp3"  # The mp3 needs to be in the same folder
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+from audio_helper import AudioPlayer
 
-try:
-    subprocess.run(
-        ["mpg123", mp3_file],
-        check=True
-    )
-except subprocess.CalledProcessError as e:
-    print("Playback failed:", e)
-    sys.exit(1)
+if __name__ == "__main__":
+    audio = AudioPlayer()
+    try:
+        audio.play(Path(__file__).resolve().parents[2] / "runtime" / "result.mp3")
+        input("Press Enter to stop playback. ")
+    finally:
+        audio.close()

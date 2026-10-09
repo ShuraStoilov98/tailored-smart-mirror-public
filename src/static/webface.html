@@ -3,32 +3,19 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Mirror Buildaton</title>
+  <title>Tailored Smart Mirror</title>
 
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#F8F8FF" />
 
   <style>
-    @font-face{
-      font-family: "Bodoni72";
-      src: url("/static/fonts/bodoni-72-oldstyle-book1.ttf") format("truetype");
-      font-weight: 400;
-      font-style: normal;
-    }
-    @font-face{
-      font-family: "BebasNeue";
-      src: url("/static/fonts/BebasNeue-Regular1.ttf") format("truetype");
-      font-weight: 400;
-      font-style: normal;
-    }
-
     :root{
       --bg: #F8F8FF;
       --btn: #D5D5D5;
 
       --hello: #959595;
       --headline: #2C2C2C;
-      --btnText: #F8F8FF;
+      --btnText: #2C2C2C;
 
       --radius: 26px;
     }
@@ -64,7 +51,7 @@
     }
 
     .hello{
-      font-family: "Bodoni72", serif;
+      font-family: Georgia, serif;
       font-weight: 400;
       font-size: 60px;
       line-height: 1.4;
@@ -73,7 +60,7 @@
     }
 
     .headline{
-      font-family: "Bodoni72", serif;
+      font-family: Georgia, serif;
       width: 100%;
       font-weight: 400;
       font-size: 40px;
@@ -115,7 +102,7 @@
     }
 
     .label{
-      font-family: "BebasNeue", sans-serif;
+      font-family: Impact, sans-serif;
       font-weight: 400;
       font-size: 40px;
       line-height: 1;
@@ -176,30 +163,40 @@
       </button>
     </div>
 
-    <div class="status" id="status">Ready.</div>
+    <p class="status">Each action captures a photo and sends it to OpenAI for styling feedback.
+      Continue only with the photographed person's consent. The spoken response is AI-generated.</p>
+    <div class="status" id="status" role="status" aria-live="polite">Ready.</div>
+    <p class="status" id="review"></p>
   </div>
 
   <script>
+    const accessToken = {{ access_token | tojson }};
     async function sendCmd(cmd) {
       const statusEl = document.getElementById("status");
       try {
-        statusEl.textContent = "Sending…";
+        document.querySelectorAll(".action").forEach(button => button.disabled = true);
+        document.getElementById("review").textContent = "";
+        statusEl.textContent = "Capturing and analyzing…";
 
         const res = await fetch("/api/cmd", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-Mirror-Token": accessToken },
           body: JSON.stringify({ cmd })
         });
 
         const data = await res.json();
         if (!res.ok || !data.ok) {
-          statusEl.textContent = "Error.";
+          statusEl.textContent = data.error || "Analysis failed.";
           return;
         }
 
-        statusEl.textContent = "Done.";
+        statusEl.textContent = "Done. Playing AI-generated feedback on the speaker.";
+        document.getElementById("review").textContent =
+          `${data.review.overall_score}/100 · ${data.review.verdict}: ${data.review.reasoning_short}`;
       } catch (e) {
         statusEl.textContent = "Network error.";
+      } finally {
+        document.querySelectorAll(".action").forEach(button => button.disabled = false);
       }
     }
   </script>

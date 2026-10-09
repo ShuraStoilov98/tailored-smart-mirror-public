@@ -1,0 +1,5 @@
+# Install after requirements.lock on Raspberry Pi 4.
+opencv-python-headless==5.0.0.93
+gpiozero==2.0.1.post3
+pygame==2.6.1
+# GPIO backend is the OS-provided python3-lgpio; see setup.

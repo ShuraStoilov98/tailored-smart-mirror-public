@@ -1,15 +1,11 @@
+"""Blink BCM23; confirm resistor and physical wiring before running."""
 from gpiozero import LED
-from time import sleep
+from signal import pause
 
-led = LED(23)
-
-try:
-    while True:
-        led.on()
-        sleep(0.5)
-        led.off()
-        sleep(0.5)
-except KeyboardInterrupt:
-    print("Stopping LED test")
-finally:
-    led.off()
+if __name__ == "__main__":
+    with LED(23) as led:
+        led.blink(on_time=0.5, off_time=0.5)
+        try:
+            pause()
+        except KeyboardInterrupt:
+            pass
