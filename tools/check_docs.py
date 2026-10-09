@@ -26,8 +26,8 @@ def main():
             if not target.is_relative_to(ROOT) or not target.exists():
                 failures.append(f"{path.relative_to(ROOT)}: missing local link {link}")
             checked += 1
-    ui = (ROOT / "src/static/webface.html").read_text(encoding="utf-8")
-    for asset in re.findall(r'(?:src="|url\(")(/static/[^"\)]+)', ui):
+    ui = (ROOT / "src/templates/index.html").read_text(encoding="utf-8")
+    for asset in re.findall(r'(?:src="|href="|url\(")(/static/[^"\)]+)', ui):
         if not (ROOT / "src" / asset.lstrip("/")).is_file():
             failures.append("Missing UI asset: " + asset)
         checked += 1

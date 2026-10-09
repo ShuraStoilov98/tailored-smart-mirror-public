@@ -47,7 +47,7 @@ cp .env.example secrets/.env
 GPIOZERO_PIN_FACTORY=lgpio python src/main.py
 ```
 
-Open `http://127.0.0.1:8080` on the Pi, or use the SSH tunnel in the setup guide. Each action captures and submits a photo, displays a verdict and plays AI-generated speech. The server binds loopback, disables the debugger and requires a per-run browser token for API routes. Inputs are deleted after each request; only the latest speech is kept in ignored `runtime/` until shutdown. Do not photograph anyone without consent.
+Open `http://127.0.0.1:8080` on the Pi, or use the SSH tunnel in the setup guide. Each action captures and submits a photo, displays a verdict and plays AI-generated speech. The server binds loopback, disables the debugger and requires a per-run browser token for API routes. Inputs are deleted after each request; only the latest successful speech is kept in ignored `runtime/` until replacement or shutdown. Do not photograph anyone without consent.
 
 For offline checks on Linux/Python 3.12:
 
@@ -62,10 +62,13 @@ python -m unittest discover -s tests -p 'test_*.py' -v
 
 | Path | Responsibility |
 | --- | --- |
-| `src/main.py` | Flask routes, prompts, image validation/capture, AI review and speech |
-| `src/led_helper.py`, `src/audio_helper.py` | Device indicators and playback |
-| `src/static/` | Original Tailored interface and artwork; system fonts used now |
+| `src/main.py` | Small launcher: local configuration and orderly shutdown |
+| `src/smart_mirror/app.py`, `routes.py` | Application factory, authenticated HTTP routes and security headers |
+| `src/smart_mirror/config.py`, `controller.py` | Validated settings, serialized analysis and media/device lifecycle |
+| `src/smart_mirror/provider.py`, `prompts.py`, `review.py` | AI calls, original styling instructions, review validation and spoken script |
+| `src/smart_mirror/images.py`, `devices/` | Safe uploads, USB capture, LED and speaker |
+| `src/templates/`, `src/static/` | Tailored HTML, separate CSS/JavaScript and original artwork |
 | `tests/` | Synthetic regression tests and manual hardware checks |
 | `BoM for 3D printed parts/` | Original STL, editable 3MF and logo SVG/DXF |
 
-Original contributors are credited in Git history. The original MIT copyright is Alexander Stoilov (2025). See [asset provenance and credits](docs/Attribution.md) and [LICENSE](LICENSE).
+All supplied project assets belong to **Tailored LTD EOOD**. Original contributors are credited in Git history, and Alexander Stoilov’s original copyright is retained alongside company ownership. See [asset provenance and credits](docs/Attribution.md) and [LICENSE](LICENSE).

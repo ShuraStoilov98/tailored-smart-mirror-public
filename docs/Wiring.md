@@ -1,6 +1,6 @@
 # Wiring
 
-The diagram shows the GPIO23 LED circuit, USB camera, Pi power and audio connections used by the application. Check the LED circuit and suggested 330 Ω resistor against the physical build before applying power.
+The diagram shows the GPIO23 LED circuit, USB camera, Pi power and audio connections used by the application. Pin defaults are defined in `src/smart_mirror/config.py`; device code lives in `src/smart_mirror/devices/`. The LED circuit and suggested 330 Ω resistor must be checked against the physical build before applying power.
 
 ```mermaid
 flowchart LR
@@ -15,7 +15,7 @@ flowchart LR
 
 | Connection | Code evidence | Verification |
 | --- | --- | --- |
-| LED BCM23 → pin 16 | `src/main.py` default and `tests/scripts/led_test.py` | Pin mapping documented; actual connection unverified |
+| LED BCM23 → pin 16 | `src/smart_mirror/config.py` default and `tests/scripts/led_test.py` | Pin mapping documented; actual connection unverified |
 | LED series resistor → LED → ground | Standard current-limited indicator circuit | Suggested 330 Ω; original part/value unverified |
 | USB camera → USB port | OpenCV `VideoCapture(index, CAP_V4L2)` | UVC device/model/index need testing |
 | Pi → speaker | pygame mixer; historical Bluetooth test | OS must select/route audio; actual speaker unverified |

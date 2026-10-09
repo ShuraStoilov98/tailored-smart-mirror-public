@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="mirror-token" content="{{ access_token }}" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tailored Smart Mirror</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#F8F8FF" />
+
+  <link rel="stylesheet" href="/static/css/mirror.css" />
+
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="logo">
+      <img src="/static/tailored-logo.png" alt="Logo" />
+    </div>
+
+    <div class="hello">hello,</div>
+
+    <div class="headline">
+      HOW CAN I HELP<br/>
+      YOU TODAY?
+    </div>
+
+    <div class="buttons">
+      <button class="action" data-command="rate" aria-label="Rate my outfit">
+        <img src="/static/outfit.png" alt="" />
+        <div class="label">RATE MY OUTFIT</div>
+      </button>
+
+      <button class="action" data-command="decide" aria-label="Decide on item">
+        <img src="/static/decide.png" alt="" />
+        <div class="label">DECIDE ON ITEM</div>
+      </button>
+    </div>
+
+    <p class="status">Each action captures a photo and sends it to OpenAI for styling feedback.
+      Continue only with the photographed person's consent. The spoken response is AI-generated.</p>
+    <div class="status" id="status" role="status" aria-live="polite">Ready.</div>
+    <p class="status" id="review"></p>
+  </div>
+
+  <script src="/static/js/mirror.js" defer></script>
+
+</body>
+</html>
