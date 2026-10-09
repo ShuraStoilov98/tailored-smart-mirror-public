@@ -27,6 +27,12 @@ flowchart LR
 
 The two modes share a review schema so the UI and spoken feedback stay consistent. The LED flashes during capture, blinks during analysis and returns to steady on afterward. OpenCV takes a single frame rather than running a continuous camera stream; pygame plays speech through the operating system's selected speaker. Editable enclosure designs accompany the software.
 
+## Hardware connections
+
+![Tailored Smart Mirror proposed wiring: Raspberry Pi 4, USB camera, USB-C power, GPIO23 status LED with series resistor and ground return, and an OS-selected speaker.](docs/assets/smart-mirror-wiring.png)
+
+**Proposed wiring, based on the code.** The GPIO23 / physical pin 16 LED circuit and suggested 330 Ω resistor need confirmation against the actual build. See the [wiring guide and editable diagram](docs/Wiring.md) for connections, pin numbering and checks before power-on.
+
 ## Project status
 
 The prototype was developed during the Christmas 2025 buildathon, with enclosure designs added in January 2026. Automated tests use simulated hardware and provider responses; the current revision still needs an end-to-end check on the physical Pi with a live AI account.

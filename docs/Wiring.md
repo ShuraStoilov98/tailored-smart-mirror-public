@@ -2,16 +2,11 @@
 
 The diagram shows the GPIO23 LED circuit, USB camera, Pi power and audio connections used by the application. Pin defaults are defined in `src/smart_mirror/config.py`; device code lives in `src/smart_mirror/devices/`. The LED circuit and suggested 330 Ω resistor must be checked against the physical build before applying power.
 
-```mermaid
-flowchart LR
-    USB[USB UVC camera] -->|USB| Pi[Raspberry Pi 4]
-    Power[Suitable USB-C Pi power supply] --> Pi
-    Pi -->|BCM23 / physical pin 16| R[330 ohm series resistor]
-    R --> A[LED anode]
-    A --> C[LED cathode]
-    C -->|physical pin 6 / GND| Pi
-    Pi -.->|OS audio output: Bluetooth or wired| Speaker[Speaker]
-```
+![Proposed Raspberry Pi 4 wiring: USB camera, USB-C power, GPIO23 physical pin 16 through a suggested 330 ohm resistor to the LED anode, LED cathode to ground at pin 6, and an OS-selected speaker.](assets/smart-mirror-wiring.png)
+
+[Full-resolution diagram](assets/smart-mirror-wiring.png) · [Editable SVG](assets/smart-mirror-wiring.svg)
+
+The colors distinguish USB camera, Pi power, LED signal, ground return and the software-selected audio route. The dashed speaker connection represents OS routing; it does not prescribe a speaker cable or GPIO connection. The board is an illustration, not a header-orientation guide. These pin labels assume the default `MIRROR_LED_PIN=23`; update the diagram and physical connection together if you change it. The table below repeats the connections as text.
 
 | Connection | Code evidence | Verification |
 | --- | --- | --- |

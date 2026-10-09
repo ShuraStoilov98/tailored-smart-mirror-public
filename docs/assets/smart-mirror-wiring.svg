@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080" role="img" aria-labelledby="title description">
+  <title id="title">Tailored Smart Mirror — proposed Raspberry Pi wiring</title>
+  <desc id="description">Logical connections for a Raspberry Pi 4: a USB camera, suitable USB-C power supply, and an OS-selected speaker. BCM GPIO23, physical header pin 16, connects through a suggested 330 ohm resistor to the LED anode. The LED cathode returns to ground at physical pin 6. This is a proposed circuit, not verified as-built wiring. Power off before wiring and verify header orientation with pinout.</desc>
+  <defs>
+    <style>
+      text { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #172642; }
+      .title { font-size: 46px; font-weight: 800; letter-spacing: -1px; }
+      .subtitle { font-size: 23px; fill: #53647d; }
+      .heading { font-size: 24px; font-weight: 700; }
+      .body { font-size: 20px; }
+      .small { font-size: 17px; }
+      .tiny { font-size: 15px; }
+      .strong { font-weight: 700; }
+      .muted { fill: #53647d; }
+      .blue { fill: #1762c4; }
+      .red { fill: #bc343a; }
+      .purple { fill: #753fba; }
+      .green { fill: #227748; }
+      .onboard { fill: #ffffff; }
+      .wire { fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      .card { stroke-width: 2; }
+    </style>
+    <marker id="blue-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7Z" fill="#1762c4"/></marker>
+    <marker id="green-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7Z" fill="#227748"/></marker>
+    <marker id="light-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="#753fba"/></marker>
+    <pattern id="pins" width="17" height="32" patternUnits="userSpaceOnUse"><rect x="4" y="3" width="7" height="7" rx="1" fill="#d9b860"/><rect x="4" y="20" width="7" height="7" rx="1" fill="#d9b860"/></pattern>
+  </defs>
+
+  <rect width="1600" height="1080" fill="#ffffff"/>
+  <rect width="1600" height="8" fill="#172642"/>
+  <text x="36" y="77" class="title">TAILORED SMART MIRROR — WIRING</text>
+  <text x="38" y="114" class="subtitle">Raspberry Pi 4 · USB camera · status LED · spoken feedback</text>
+  <rect x="36" y="134" width="1528" height="34" rx="7" fill="#fff3da"/>
+  <text x="52" y="157" class="small strong" fill="#815208">PROPOSED CIRCUIT · Logical connections, not a verified as-built drawing · Check the physical build before power-on</text>
+
+  <!-- Main hardware cards. Connections are logical; component drawings are illustrative. -->
+  <rect x="36" y="190" width="330" height="238" rx="14" fill="#f2f7ff" stroke="#82ace0" class="card"/>
+  <text x="58" y="228" class="heading blue">USB CAMERA</text>
+  <rect x="58" y="258" width="110" height="65" rx="17" fill="#233047"/>
+  <rect x="63" y="263" width="100" height="55" rx="13" fill="#35455f"/>
+  <circle cx="113" cy="291" r="24" fill="#101827"/>
+  <circle cx="113" cy="291" r="16" fill="#789dbf"/>
+  <circle cx="113" cy="291" r="10" fill="#1c304a"/>
+  <circle cx="108" cy="286" r="4" fill="#d5ecff"/>
+  <path d="M97 326V336H129V326" fill="#53647d"/>
+  <text x="184" y="277" class="body strong">USB / UVC</text>
+  <text x="184" y="304" class="small">OpenCV + V4L2</text>
+  <text x="58" y="369" class="body">Connect to a Pi USB port.</text>
+  <text x="58" y="397" class="small muted">Model and index need checking.</text>
+  <path d="M366 320H400" class="wire" stroke="#1762c4" marker-end="url(#blue-arrow)"/>
+
+  <rect x="36" y="450" width="330" height="246" rx="14" fill="#fff5f3" stroke="#de9492" class="card"/>
+  <text x="58" y="488" class="heading red">PI POWER SUPPLY</text>
+  <rect x="61" y="516" width="76" height="80" rx="13" fill="#ffffff" stroke="#b8bec8" stroke-width="2"/>
+  <rect x="83" y="501" width="9" height="16" rx="2" fill="#7b8796"/>
+  <rect x="107" y="501" width="9" height="16" rx="2" fill="#7b8796"/>
+  <path d="M137 556H155Q167 556 167 572V594" fill="none" stroke="#bc343a" stroke-width="4"/>
+  <rect x="159" y="590" width="16" height="22" rx="5" fill="#65758b"/>
+  <text x="186" y="541" class="body strong">Suitable Pi 4</text>
+  <text x="186" y="570" class="body strong">USB-C supply</text>
+  <text x="58" y="647" class="body">Use the Pi USB-C power port.</text>
+  <text x="58" y="675" class="small red">Do not feed power into GPIO23.</text>
+  <path d="M366 566H398" class="wire" stroke="#bc343a"/>
+
+  <rect x="398" y="190" width="514" height="506" rx="14" fill="#f6f8fb" stroke="#95a6bc" class="card"/>
+  <text x="422" y="228" class="heading">RASPBERRY PI 4</text>
+  <text x="422" y="260" class="small muted">J8 header · logical connection points</text>
+  <text x="858" y="294" text-anchor="end" class="body strong purple">GPIO23 · physical pin 16</text>
+  <text x="858" y="322" text-anchor="end" class="small muted">3.3 V output → series resistor → LED</text>
+  <circle cx="892" cy="296" r="7" fill="#753fba"/>
+  <text x="858" y="398" text-anchor="end" class="body strong">GND · physical pin 6</text>
+  <text x="858" y="426" text-anchor="end" class="small muted">LED cathode returns here</text>
+  <circle cx="892" cy="400" r="7" fill="#172642"/>
+
+  <!-- Stylized board, intentionally separate from the logical pin callouts. -->
+  <rect x="442" y="462" width="424" height="160" rx="15" fill="#33825a" stroke="#236445" stroke-width="3"/>
+  <circle cx="457" cy="477" r="6" fill="#f6f8fb" stroke="#ceba70" stroke-width="3"/>
+  <circle cx="851" cy="607" r="6" fill="#f6f8fb" stroke="#ceba70" stroke-width="3"/>
+  <rect x="480" y="474" width="340" height="35" rx="3" fill="#18252a"/>
+  <rect x="480" y="474" width="340" height="32" fill="url(#pins)"/>
+  <rect x="562" y="526" width="78" height="64" rx="5" fill="#c4ccd2" stroke="#83929e" stroke-width="2"/>
+  <text x="601" y="564" text-anchor="middle" class="small strong">SoC</text>
+  <rect x="477" y="535" width="47" height="43" rx="3" fill="#243940"/>
+  <rect x="661" y="529" width="50" height="54" rx="3" fill="#243940"/>
+  <rect x="795" y="524" width="74" height="40" rx="3" fill="#ced7dd" stroke="#83929e" stroke-width="2"/>
+  <rect x="795" y="574" width="74" height="31" rx="3" fill="#ced7dd" stroke="#83929e" stroke-width="2"/>
+  <rect x="458" y="602" width="32" height="25" rx="7" fill="#c4ccd2" stroke="#83929e" stroke-width="2"/>
+  <text x="737" y="552" text-anchor="middle" class="tiny onboard">USB</text>
+  <text x="518" y="609" class="tiny onboard">USB-C</text>
+  <text x="422" y="659" class="small muted">Board illustration · use pinout to locate real pins.</text>
+
+  <rect x="944" y="190" width="620" height="290" rx="14" fill="#f9f5ff" stroke="#b499d9" class="card"/>
+  <text x="968" y="228" class="heading purple">STATUS LED · PROPOSED SERIES CIRCUIT</text>
+  <text x="1118" y="265" text-anchor="middle" class="body strong purple">330 Ω*</text>
+  <path d="M892 296H1076" class="wire" stroke="#753fba"/>
+  <rect x="1076" y="282" width="84" height="28" rx="2" fill="#ffffff" stroke="#753fba" stroke-width="3"/>
+  <path d="M1160 296H1262" class="wire" stroke="#753fba"/>
+  <path d="M1262 279L1300 296L1262 313Z" fill="#eadcfb" stroke="#753fba" stroke-width="3"/>
+  <path d="M1300 278V314" stroke="#753fba" stroke-width="4"/>
+  <path d="M1289 267L1310 246M1312 277L1333 256" fill="none" stroke="#753fba" stroke-width="2.5" marker-end="url(#light-arrow)"/>
+  <path d="M1300 296H1450V400H892" class="wire" stroke="#172642"/>
+  <text x="1222" y="343" text-anchor="middle" class="small strong purple">Anode (+)</text>
+  <text x="1363" y="343" text-anchor="middle" class="small strong">Cathode (−)</text>
+  <text x="1282" y="376" text-anchor="middle" class="small">Small indicator LED</text>
+  <text x="968" y="447" class="small muted">* Suggested value; confirm LED specifications and actual resistor.</text>
+
+  <rect x="944" y="504" width="620" height="192" rx="14" fill="#f2faf4" stroke="#91bca0" class="card"/>
+  <text x="968" y="542" class="heading green">SPOKEN OUTPUT</text>
+  <path d="M912 592H947" class="wire" stroke="#227748" stroke-dasharray="8 7" marker-end="url(#green-arrow)"/>
+  <text x="968" y="580" class="body strong">OS-selected speaker</text>
+  <text x="968" y="610" class="body">Bluetooth or wired audio</text>
+  <text x="968" y="651" class="small muted">pygame uses the system audio route.</text>
+  <text x="968" y="675" class="small muted">Pair/select the output in the OS first.</text>
+  <rect x="1448" y="553" width="61" height="104" rx="9" fill="#314c41"/>
+  <circle cx="1479" cy="578" r="10" fill="#a5bcad"/>
+  <circle cx="1479" cy="621" r="22" fill="#172d22" stroke="#a5bcad" stroke-width="3"/>
+  <path d="M1524 580Q1540 603 1524 626M1534 569Q1558 603 1534 637" fill="none" stroke="#227748" stroke-width="3"/>
+
+  <!-- Quick reference cards. -->
+  <rect x="36" y="724" width="490" height="272" rx="14" fill="#f2f7ff" stroke="#82ace0" class="card"/>
+  <text x="58" y="763" class="heading blue">PIN &amp; CONNECTION REFERENCE</text>
+  <rect x="58" y="782" width="446" height="35" rx="4" fill="#dde9fa"/>
+  <text x="72" y="806" class="small strong">Function</text><text x="302" y="806" class="small strong">Connection</text>
+  <text x="72" y="849" class="body">LED signal</text><text x="302" y="849" class="body strong">BCM23 / pin 16</text>
+  <path d="M58 866H504" stroke="#cedcef"/>
+  <text x="72" y="896" class="body">LED return</text><text x="302" y="896" class="body strong">GND / pin 6</text>
+  <path d="M58 913H504" stroke="#cedcef"/>
+  <text x="72" y="943" class="body">Camera / Pi power</text><text x="302" y="943" class="body">USB / USB-C</text>
+  <text x="58" y="977" class="small muted">BCM numbers and physical pin numbers differ.</text>
+
+  <rect x="548" y="724" width="490" height="272" rx="14" fill="#fff9ef" stroke="#d7b269" class="card"/>
+  <text x="570" y="763" class="heading" fill="#815208">BEFORE APPLYING POWER</text>
+  <text x="570" y="810" class="body">1. Power off before changing wiring.</text>
+  <text x="570" y="850" class="body">2. Verify pin 1 and header orientation.</text>
+  <text x="570" y="890" class="body">3. Check resistor and LED polarity.</text>
+  <text x="570" y="930" class="body">4. Keep 5 V away from GPIO signals.</text>
+  <text x="570" y="977" class="small muted">Run pinout on the Pi; confirm actual hardware.</text>
+
+  <rect x="1060" y="724" width="504" height="272" rx="14" fill="#f6f8fb" stroke="#95a6bc" class="card"/>
+  <text x="1082" y="763" class="heading">WHAT THE CODE ESTABLISHES</text>
+  <text x="1082" y="810" class="body">LED: gpiozero · BCM23 default</text>
+  <text x="1082" y="850" class="body">Camera: USB / V4L2 · index 0 default</text>
+  <text x="1082" y="890" class="body">Audio: pygame · selected OS output</text>
+  <text x="1082" y="938" class="small muted">If MIRROR_LED_PIN changes, update wiring.</text>
+  <text x="1082" y="966" class="small muted">Camera, speaker and as-built wiring unverified.</text>
+
+  <path d="M36 1019H1564" stroke="#d6dfeb"/>
+  <path d="M38 1042H70" class="wire" stroke="#1762c4"/><text x="83" y="1048" class="small">USB camera</text>
+  <path d="M248 1042H280" class="wire" stroke="#bc343a"/><text x="293" y="1048" class="small">USB-C power</text>
+  <path d="M469 1042H501" class="wire" stroke="#753fba"/><text x="514" y="1048" class="small">LED signal</text>
+  <path d="M670 1042H702" class="wire" stroke="#172642"/><text x="715" y="1048" class="small">GND / return</text>
+  <path d="M891 1042H931" class="wire" stroke="#227748" stroke-dasharray="8 7"/><text x="944" y="1048" class="small">OS audio route</text>
+  <text x="1564" y="1048" text-anchor="end" class="small muted">Tailored LTD EOOD</text>
+</svg>
